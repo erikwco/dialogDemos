@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .no-display {
+            display: none;
+        }
+
+        .do-display {
+            display:block;
+        }
+
+        .loading-indicator .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #000;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+        from {
+            transform: rotate(0deg);
+            background-color: #000;
+        }
+        to {
+            transform: rotate(360deg);
+            background-color: #fff;
+        }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <button onclick="OpenDialog()"> Start </button>  
+
+
+    <dialog data-dialog>
+        <iframe data-iframe src="#" frameborder="0"></iframe>
+    </dialog>
+
+    <div class="loading-indicator no-display" data-loading>
+        <div class="circle"></div>
+      </div>
+
+    <script>
+
+        let handler;
+        async function OpenDialog() {
+            console.log("start");
+            handler = await  StartDialog();
+            console.log(handler);
+            console.log("end");
+        }
+
+        function StartDialog() {
+            return new Promise((resolve, reject) => {
+                let d = document.querySelector("[data-dialog]");
+                //let b = document.querySelector("[data-close-button]");
+                let i = document.querySelector("[data-iframe]");
+                let lo = document.querySelector("[data-loading]");
+                lo.classList.remove("no-display");
+                lo.classList.add("do-display");
+
+                i.src = "dialog.html";
+
+                d.addEventListener("close", function dialog_lister (e)  {
+                    let msg = d.returnValue === 'default' ? "No return value." : `ReturnValue: ${d.returnValue}.`;
+                    console.log(msg);
+                    d.removeEventListener("close", dialog_lister);
+
+                })
+
+                i.addEventListener("load", function load_listener()  {
+                    let b = i.contentWindow.document.querySelector("[data-iframe-button-close]");
+                    console.log(b);
+                    lo.classList.add("no-display");
+                    lo.classList.remove("do-display");
+                    d.show();
+                    b.addEventListener("click", () => {
+                        d.close("cerrado");
+                        resolve("listo");
+                    });
+
+                    i.removeEventListener("load", load_listener);
+                });
+
+            });
+        }
+
+
+    </script>
+
+</body>
+</html>
